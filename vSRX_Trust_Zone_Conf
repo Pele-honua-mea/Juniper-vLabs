@@ -1,0 +1,291 @@
+Lab: Create security zones & policies to allow communication between host 1 and host 2 through vSRX device:
+ge-0/0/0 --> host 1 (trust zone)
+ge-0/0/1 --> host 2 (trust zone)
+
+jcluser@vSRX1> edit
+Entering configuration mode
+
+Step 1: Deletion of default security policies:
+
+[edit]
+jcluser@vSRX1# delete security policies from-zone trust to-zone trust policy default-permit
+
+[edit]
+jcluser@vSRX1# delete security policies from-zone trust to-zone untrust policy default-permit
+
+[edit]
+jcluser@vSRX1# delete security zones security-zone trust
+
+[edit]
+jcluser@vSRX1# delete security zones security-zone untrust
+
+[edit]
+jcluser@vSRX1# commit and-quit
+
+/config/license/TrialJUNOS961387388.lic:1:(0) TrialJUNOS961387388: Ignoring the license for feature id: 292.This feature is not used by your product.
+commit complete
+Exiting configuration mode
+
+jcluser@vSRX1> edit
+Entering configuration mode
+
+
+Step 2: Naming the interfaces
+[edit]
+jcluser@vSRX1# set interfaces ge-0/0/0 description host1
+
+[edit]
+jcluser@vSRX1# set interfaces ge-0/0/1 description host2
+
+[edit]
+jcluser@vSRX1# commit and-quit
+'
+/config/license/TrialJUNOS961387388.lic:1:(0) TrialJUNOS961387388: Ignoring the license for feature id: 292.This feature is not used by your product.
+commit complete
+Exiting configuration mode
+
+Step 3: Analyzing the ICMP packets sent from host1 to host2
+jcluser@vSRX1> clear interfaces statistics ge-0/0/0
+jcluser@vSRX1> monitor interface ge-0/0/0
+
+vSRX1               Seconds: 9                   Time: 07:14:46
+                                             Delay: 0/0/1Interface: ge-0/0/0, Enabled, Link is UpEncapsulation: Ethernet, Speed: 10000mbps
+Traffic statistics:                                Current delta
+  Input bytes:                         0 (0 bps)             [0]
+  Output bytes:                        0 (0 bps)             [0]
+  Input packets:                       0 (0 pps)             [0]
+  Output packets:                      0 (0 pps)             [0]
+Error statistics:
+  Input errors:                        0                     [0]
+  Input drops:                         0                     [0]
+  Input framing errors:                0                     [0]
+  Policed discards:                    0                     [0]
+  L3 incompletes:                      0                     [0]
+  L2 channel errors:                   0                     [0]
+  L2 mismatch timeouts:                0                     [0]
+  Carrier transitions:                 0                     [0]
+  Output errors:                       0                     [0]
+  Output drops:                        0                     [0]  Aged packets:                        0                     [0]Active alarms : NoneActive defects: NoneInput MA             [0]
+
+
+jcluser@vSRX1> show security packet-drop records
+07:16:15.205077:LSYS-ID-00 10.100.11.2/55375-->10.100.12.2/9;icmp,ipid-8480,ge-0/0/0.0,Dropped by FLOW:First path Invalid zone
+07:16:14.702932:LSYS-ID-00 10.100.11.2/55375-->10.100.12.2/8;icmp,ipid-1568,ge-0/0/0.0,Dropped by FLOW:First path Invalid zone
+07:16:14.194774:LSYS-ID-00 10.100.11.2/55375-->10.100.12.2/7;icmp,ipid-61215,ge-0/0/0.0,Dropped by FLOW:First path Invalid zone
+07:16:13.693004:LSYS-ID-00 10.100.11.2/55375-->10.100.12.2/6;icmp,ipid-55583,ge-0/0/0.0,Dropped by FLOW:First path Invalid zone
+07:16:13.183982:LSYS-ID-00 10.100.11.2/55375-->10.100.12.2/5;icmp,ipid-50719,ge-0/0/0.0,Dropped by FLOW:First path Invalid zone
+07:16:12.682557:LSYS-ID-00 10.100.11.2/55375-->10.100.12.2/4;icmp,ipid-44319,ge-0/0/0.0,Dropped by FLOW:First path Invalid zone
+07:16:12.181329:LSYS-ID-00 10.100.11.2/55375-->10.100.12.2/3;icmp,ipid-39711,ge-0/0/0.0,Dropped by FLOW:First path Invalid zone
+07:16:11.675084:LSYS-ID-00 10.100.11.2/55375-->10.100.12.2/2;icmp,ipid-34079,ge-0/0/0.0,Dropped by FLOW:First path Invalid zone
+07:16:11.172310:LSYS-ID-00 10.100.11.2/55375-->10.100.12.2/1;icmp,ipid-29215,ge-0/0/0.0,Dropped by FLOW:First path Invalid zone
+07:16:10.667899:LSYS-ID-00 10.100.11.2/55375-->10.100.12.2/0;icmp,ipid-23071,ge-0/0/0.0,Dropped by FLOW:First path Invalid zone
+07:15:27.233489:LSYS-ID-00 0.0.0.0/1-->224.0.0.1/1;igmp,ipid-0,ge-0/0/2.0,Dropped by FLOW:First path Invalid zone
+07:15:27.233486:LSYS-ID-00 0.0.0.0/1-->224.0.0.1/1;igmp,ipid-0,ge-0/0/0.0,Dropped by FLOW:First path Invalid zone
+07:15:27.233474:LSYS-ID-00 0.0.0.0/1-->224.0.0.1/1;igmp,ipid-0,ge-0/0/1.0,Dropped by FLOW:First path Invalid zone
+07:13:22.233128:LSYS-ID-00 0.0.0.0/1-->224.0.0.1/1;igmp,ipid-0,ge-0/0/2.0,Dropped by FLOW:First path Invalid zone
+07:13:22.233126:LSYS-ID-00 0.0.0.0/1-->224.0.0.1/1;igmp,ipid-0,ge-0/0/0.0,Dropped by FLOW:First path Invalid zone
+07:13:22.233119:LSYS-ID-00 0.0.0.0/1-->224.0.0.1/1;igmp,ipid-0,ge-0/0/1.0,Dropped by FLOW:First path Invalid zone
+07:11:17.232704:LSYS-ID-00 0.0.0.0/1-->224.0.0.1/1;igmp,ipid-0,ge-0/0/0.0,Dropped by FLOW:First path Invalid zone
+07:11:17.232702:LSYS-ID-00 0.0.0.0/1-->224.0.0.1/1;igmp,ipid-0,ge-0/0/1.0,Dropped by FLOW:First path Invalid zone
+07:11:17.232692:LSYS-ID-00 0.0.0.0/1-->224.0.0.1/1;igmp,ipid-0,ge-0/0/2.0,Dropped by FLOW:First path Invalid zone
+07:11:06.981144:LSYS-ID-00 10.100.11.2/46671-->10.100.12.2/9;icmp,ipid-5622,ge-0/0/0.0,Dropped by FLOW:First path Invalid zone
+07:11:06.477770:LSYS-ID-00 10.100.11.2/46671-->10.100.12.2/8;icmp,ipid-65525,ge-0/0/0.0,Dropped by FLOW:First path Invalid zone
+07:11:05.972413:LSYS-ID-00 10.100.11.2/46671-->10.100.12.2/7;icmp,ipid-60917,ge-0/0/0.0,Dropped by FLOW:First path Invalid zone
+07:11:05.467784:LSYS-ID-00 10.100.11.2/46671-->10.100.12.2/6;icmp,ipid-55029,ge-0/0/0.0,Dropped by FLOW:First path Invalid zone
+07:11:04.962608:LSYS-ID-00 10.100.11.2/46671-->10.100.12.2/5;icmp,ipid-50677,ge-0/0/0.0,Dropped by FLOW:First path Invalid zone
+07:11:04.457681:LSYS-ID-00 10.100.11.2/46671-->10.100.12.2/4;icmp,ipid-44789,ge-0/0/0.0,Dropped by FLOW:First path Invalid zone
+07:11:03.955853:LSYS-ID-00 10.100.11.2/46671-->10.100.12.2/3;icmp,ipid-40437,ge-0/0/0.0,Dropped by FLOW:First path Invalid zone
+07:11:03.451600:LSYS-ID-00 10.100.11.2/46671-->10.100.12.2/2;icmp,ipid-34037,ge-0/0/0.0,Dropped by FLOW:First path Invalid zone
+07:11:02.948269:LSYS-ID-00 10.100.11.2/46671-->10.100.12.2/1;icmp,ipid-29685,ge-0/0/0.0,Dropped by FLOW:First path Invalid zone
+07:11:02.442904:LSYS-ID-00 10.100.11.2/46671-->10.100.12.2/0;icmp,ipid-23797,ge-0/0/0.0,Dropped by FLOW:First path Invalid zone
+07:09:12.232350:LSYS-ID-00 0.0.0.0/1-->224.0.0.1/1;igmp,ipid-0,ge-0/0/1.0,Dropped by FLOW:First path Invalid zone
+07:09:12.232348:LSYS-ID-00 0.0.0.0/1-->224.0.0.1/1;igmp,ipid-0,ge-0/0/2.0,Dropped by FLOW:First path Invalid zone
+07:09:12.232338:LSYS-ID-00 0.0.0.0/1-->224.0.0.1/1;igmp,ipid-0,ge-0/0/0.0,Dropped by FLOW:First path Invalid zone
+07:07:07.232075:LSYS-ID-00 0.0.0.0/1-->224.0.0.1/1;igmp,ipid-0,ge-0/0/1.0,Dropped by FLOW:First path Self but not interested
+07:07:07.232071:LSYS-ID-00 0.0.0.0/1-->224.0.0.1/1;igmp,ipid-0,ge-0/0/2.0,Dropped by FLOW:First path Self but not interested
+07:07:07.232055:LSYS-ID-00 0.0.0.0/1-->224.0.0.1/1;igmp,ipid-0,ge-0/0/0.0,Dropped by FLOW:First path Self but not interested
+07:05:02.235284:LSYS-ID-00 0.0.0.0/1-->224.0.0.1/1;igmp,ipid-0,ge-0/0/1.0,Dropped by FLOW:First path Self but not interested
+07:05:02.235278:LSYS-ID-00 0.0.0.0/1-->224.0.0.1/1;igmp,ipid-0,ge-0/0/2.0,Dropped by FLOW:First path Self but not interested
+07:05:02.235268:LSYS-ID-00 0.0.0.0/1-->224.0.0.1/1;igmp,ipid-0,ge-0/0/0.0,Dropped by FLOW:First path Self but not interested
+07:02:57.297395:LSYS-ID-00 0.0.0.0/1-->224.0.0.1/1;igmp,ipid-0,ge-0/0/1.0,Dropped by FLOW:First path Self but not interested
+07:02:57.297387:LSYS-ID-00 0.0.0.0/1-->224.0.0.1/1;igmp,ipid-0,ge-0/0/2.0,Dropped by FLOW:First path Self but not interested
+07:02:57.297363:LSYS-ID-00 0.0.0.0/1-->224.0.0.1/1;igmp,ipid-0,ge-0/0/0.0,Dropped by FLOW:First path Self but not interested
+07:00:52.359534:LSYS-ID-00 0.0.0.0/1-->224.0.0.1/1;igmp,ipid-0,ge-0/0/1.0,Dropped by FLOW:First path Self but not interested
+07:00:52.359521:LSYS-ID-00 0.0.0.0/1-->224.0.0.1/1;igmp,ipid-0,ge-0/0/2.0,Dropped by FLOW:First path Self but not interested
+07:00:52.359495:LSYS-ID-00 0.0.0.0/1-->224.0.0.1/1;igmp,ipid-0,ge-0/0/0.0,Dropped by FLOW:First path Self but not interested
+06:58:47.421680:LSYS-ID-00 0.0.0.0/1-->224.0.0.1/1;igmp,ipid-0,ge-0/0/1.0,Dropped by FLOW:First path Self but not interested
+06:58:47.421677:LSYS-ID-00 0.0.0.0/1-->224.0.0.1/1;igmp,ipid-0,ge-0/0/2.0,Dropped by FLOW:First path Self but not interested
+06:58:47.421620:LSYS-ID-00 0.0.0.0/1-->224.0.0.1/1;igmp,ipid-0,ge-0/0/0.0,Dropped by FLOW:First path Self but not interested
+06:56:42.483735:LSYS-ID-00 0.0.0.0/1-->224.0.0.1/1;igmp,ipid-0,ge-0/0/1.0,Dropped by FLOW:First path Self but not interested
+06:56:42.483731:LSYS-ID-00 0.0.0.0/1-->224.0.0.1/1;igmp,ipid-0,ge-0/0/2.0,Dropped by FLOW:First path Self but not interested
+06:56:42.483717:LSYS-ID-00 0.0.0.0/1-->224.0.0.1/1;igmp,ipid-0,ge-0/0/0.0,Dropped by FLOW:First path Self but not interested
+Total packet-drop records: 50
+
+
+jcluser@vSRX1> edit
+Entering configuration mode
+
+
+Note: The packets are dropped because traffic isn't associated with any zone.
+
+Step 4: Re-creating security zone "trust", assigning interfaces to it and allowing system-service "ping" for the SRX itself to respond to pings directed to it
+
+[edit]
+jcluser@vSRX1# set security zones security-zone trust
+
+[edit]
+jcluser@vSRX1# show security zones
+security-zone trust;
+
+[edit]
+jcluser@vSRX1# set security zones security-zone trust interfaces ge-0/0/0
+
+[edit]
+jcluser@vSRX1# set security zones security-zone trust interfaces ge-0/0/1
+
+[edit]
+jcluser@vSRX1# set security zones security-zone trust host-inbound-traffic system-services ping
+
+[edit]
+jcluser@vSRX1# show security zones
+security-zone trust {
+    host-inbound-traffic {
+        system-services {
+            ping;
+        }
+    }
+    interfaces {
+        ge-0/0/0.0;
+        ge-0/0/1.0;
+    }
+}
+
+Step 5: Analyzing the ICMP packets again
+
+jcluser@vSRX1> clear security packet-drop records
+50 packet-drop records cleared
+
+jcluser@vSRX1> show security packet-drop records
+Total packet-drop records: 0
+
+jcluser@vSRX1> show security packet-drop records
+07:27:57.235778:LSYS-ID-00 0.0.0.0/1-->224.0.0.1/1;igmp,ipid-0,ge-0/0/0.0,Dropped by FLOW:First path Self but not interested
+07:27:57.235772:LSYS-ID-00 0.0.0.0/1-->224.0.0.1/1;igmp,ipid-0,ge-0/0/1.0,Dropped by FLOW:First path Self but not interested
+07:27:57.235749:LSYS-ID-00 0.0.0.0/1-->224.0.0.1/1;igmp,ipid-0,ge-0/0/2.0,Dropped by FLOW:First path Invalid zone
+07:27:25.033848:LSYS-ID-00 10.100.11.2/10832-->10.100.12.2/9;icmp,ipid-32634,ge-0/0/0.0,Dropped by POLICY:Denied by Policy  default-policy-logical-system-00
+07:27:24.523421:LSYS-ID-00 10.100.11.2/10832-->10.100.12.2/8;icmp,ipid-26746,ge-0/0/0.0,Dropped by POLICY:Denied by Policy  default-policy-logical-system-00
+07:27:24.015643:LSYS-ID-00 10.100.11.2/10832-->10.100.12.2/7;icmp,ipid-21626,ge-0/0/0.0,Dropped by POLICY:Denied by Policy  default-policy-logical-system-00
+07:27:23.517786:LSYS-ID-00 10.100.11.2/10832-->10.100.12.2/6;icmp,ipid-16250,ge-0/0/0.0,Dropped by POLICY:Denied by Policy  default-policy-logical-system-00
+07:27:23.003804:LSYS-ID-00 10.100.11.2/10832-->10.100.12.2/5;icmp,ipid-11130,ge-0/0/0.0,Dropped by POLICY:Denied by Policy  default-policy-logical-system-00
+07:27:22.501105:LSYS-ID-00 10.100.11.2/10832-->10.100.12.2/4;icmp,ipid-5754,ge-0/0/0.0,Dropped by POLICY:Denied by Policy  default-policy-logical-system-00
+07:27:21.999060:LSYS-ID-00 10.100.11.2/10832-->10.100.12.2/3;icmp,ipid-378,ge-0/0/0.0,Dropped by POLICY:Denied by Policy  default-policy-logical-system-00
+07:27:21.497686:LSYS-ID-00 10.100.11.2/10832-->10.100.12.2/2;icmp,ipid-60793,ge-0/0/0.0,Dropped by POLICY:Denied by Policy  default-policy-logical-system-00
+07:27:20.993835:LSYS-ID-00 10.100.11.2/10832-->10.100.12.2/1;icmp,ipid-54393,ge-0/0/0.0,Dropped by POLICY:Denied by Policy  default-policy-logical-system-00
+07:27:20.488499:LSYS-ID-00 10.100.11.2/10832-->10.100.12.2/0;icmp,ipid-47481,ge-0/0/0.0,Dropped by POLICY:Denied by Policy  default-policy-logical-system-00
+Total packet-drop records: 13
+
+jcluser@vSRX1> edit
+Entering configuration mode
+
+Note: The packets are dropped again. The "trust" zone is re-created and has assigned interfaces to it, so there traffic is now inside the zone, but there are no policies created and the SRX firewalls have a default deny policy.
+Step 5: Creating policy for PING
+[edit]
+jcluser@vSRX1# set security policies from-zone trust to-zone trust policy ALLOW_ICMP match source-address any
+[edit]
+jcluser@vSRX1# set security policies from-zone trust to-zone trust policy ALLOW_ICMP match destination-address any
+[edit]
+jcluser@vSRX1# set security policies from-zone trust to-zone trust policy ALLOW_ICMP match application junos-ping
+[edit]
+jcluser@vSRX1# set security policies from-zone trust to-zone trust policy ALLOW_ICMP then permit
+[edit]
+jcluser@vSRX1# show security policies
+from-zone trust to-zone trust {
+    policy ALLOW_ICMP {
+        match {
+            source-address any;
+            destination-address any;
+            application junos-ping;
+        }
+        then {
+            permit;
+        }
+    }
+}
+[edit]
+jcluser@vSRX1# commit and-quit
+
+/config/license/TrialJUNOS961387388.lic:1:(0) TrialJUNOS961387388: Ignoring the license for feature id: 292.This feature is not used by your product.
+commit complete
+Exiting configuration mode
+
+Step 6: Ping again
+jcluser@vSRX1> show security policies hit-count
+Logical system: root-logical-system
+ Index   From zone        To zone           Name           Policy count
+ 1       trust            trust             ALLOW_ICMP     0
+
+Number of policy: 1
+
+jcluser@vSRX1> show security policies hit-count
+Logical system: root-logical-system
+ Index   From zone        To zone           Name           Policy count
+ 1       trust            trust             ALLOW_ICMP     10
+
+Number of policy: 1
+
+jcluser@vSRX1> edit
+Entering configuration mode
+
+
+Step 7: Creating policy for SSH
+[edit]
+jcluser@vSRX1# set security policies from-zone trust to-zone trust policy ALLOW_SSH match source-address any
+
+[edit]
+jcluser@vSRX1# set security policies from-zone trust to-zone trust policy ALLOW_SSH match destination-address any
+
+[edit]
+jcluser@vSRX1# set security policies from-zone trust to-zone trust policy ALLOW_SSH match application junos-ssh
+
+[edit]
+jcluser@vSRX1# set security policies from-zone trust to-zone trust policy ALLOW_SSH then permit
+
+[edit]
+jcluser@vSRX1# show security policies
+from-zone trust to-zone trust {
+    policy ALLOW_ICMP {
+        match {
+            source-address any;
+            destination-address any;
+            application junos-ping;
+        }
+        then {
+            permit;
+        }
+    }
+    policy ALLOW_SSH {
+        match {
+            source-address any;
+            destination-address any;
+            application junos-ssh;
+        }
+        then {
+            permit;
+        }
+    }
+}
+[edit]
+jcluser@vSRX1# commit and-quit
+
+/config/license/TrialJUNOS961387388.lic:1:(0) TrialJUNOS961387388: Ignoring the license for feature id: 292.This feature is not used by your product.
+commit complete
+Exiting configuration mode
+
+Step 8: Checking that both protocols work as expected
+jcluser@vSRX1> show security policies hit-count
+Logical system: root-logical-system
+ Index   From zone        To zone           Name           Policy count
+ 1       trust            trust             ALLOW_ICMP     10
+ 2       trust            trust             ALLOW_SSH      1
+
+Number of policy: 2
