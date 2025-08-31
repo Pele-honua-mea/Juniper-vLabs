@@ -1,0 +1,197 @@
+jcluser@vSRX1> configure 
+Entering configuration mode
+
+[edit]
+jcluser@vSRX1# delete security policies from-zone trust to-zone trust policy default-permit                    
+
+[edit]
+jcluser@vSRX1# delete security policies from-zone trust to-zone untrust policy default-permit                  
+
+[edit]
+jcluser@vSRX1# delete security zones security-zone trust 
+
+[edit]
+jcluser@vSRX1# delete security zones security-zone untrust 
+
+[edit]
+jcluser@vSRX1# commit and-quit 
+
+/config/license/TrialJUNOS986842235.lic:1:(0) TrialJUNOS986842235: Ignoring the license for feature id: 292.This feature is not used by your product.
+commit complete
+Exiting configuration mode
+
+jcluser@vSRX1> clear interfaces statistics ge-0/0/0 
+
+jcluser@vSRX1> monitor interface ge-0/0/0
+
+vSRX1               Seconds: 30                  Time: 11:55:08
+                                             Delay: 0/0/1
+Interface: ge-0/0/0, Enabled, Link is Up
+Encapsulation: Ethernet, Speed: 10000mbps
+Traffic statistics:                                Current delta
+  Input bytes:                       840 (0 bps)           [840]
+  Output bytes:                        0 (0 bps)             [0]
+  Input packets:                      10 (0 pps)            [10]
+  Output packets:                      0 (0 pps)             [0]
+Error statistics:
+  Input errors:                        0                     [0]
+  Input drops:                         0                     [0]  Input framing errors:                0                     [0]  Policed discards:                    0                     [0]
+  L3 incompletes:                      0                     [0]
+  L2 channel errors:                   0                     [0]
+  L2 mismatch timeouts:                0                     [0]
+  Carrier transitions:                 0                     [0]
+  Output errors:                       0                     [0]
+  Output drops:                        0                     [0]
+  Aged packets:                        0                     [0]
+Active alarms : NoneActive defects: NoneInput MA             [0]
+
+jcluser@vSRX1> show security packet-drop records 
+11:57:47.749081:LSYS-ID-00 10.100.11.2/42319-->10.100.13.2/9;icmp,ipid-32227,ge-0/0/0.0,Dropped by FLOW:First path Invalid zone
+11:57:47.243856:LSYS-ID-00 10.100.11.2/42319-->10.100.13.2/8;icmp,ipid-27107,ge-0/0/0.0,Dropped by FLOW:First path Invalid zone
+11:57:46.739629:LSYS-ID-00 10.100.11.2/42319-->10.100.13.2/7;icmp,ipid-21219,ge-0/0/0.0,Dropped by FLOW:First path Invalid zone
+11:57:46.233514:LSYS-ID-00 10.100.11.2/42319-->10.100.13.2/6;icmp,ipid-15843,ge-0/0/0.0,Dropped by FLOW:First path Invalid zone
+11:57:45.729703:LSYS-ID-00 10.100.11.2/42319-->10.100.13.2/5;icmp,ipid-8931,ge-0/0/0.0,Dropped by FLOW:First path Invalid zone
+11:57:45.223919:LSYS-ID-00 10.100.11.2/42319-->10.100.13.2/4;icmp,ipid-3811,ge-0/0/0.0,Dropped by FLOW:First path Invalid zone
+11:57:44.719195:LSYS-ID-00 10.100.11.2/42319-->10.100.13.2/3;icmp,ipid-63458,ge-0/0/0.0,Dropped by FLOW:First path Invalid zone
+11:57:44.213679:LSYS-ID-00 10.100.11.2/42319-->10.100.13.2/2;icmp,ipid-58338,ge-0/0/0.0,Dropped by FLOW:First path Invalid zone
+11:57:43.709544:LSYS-ID-00 10.100.11.2/42319-->10.100.13.2/1;icmp,ipid-52706,ge-0/0/0.0,Dropped by FLOW:First path Invalid zone
+11:57:43.207975:LSYS-ID-00 10.100.11.2/42319-->10.100.13.2/0;icmp,ipid-47330,ge-0/0/0.0,Dropped by FLOW:First path Invalid zone
+11:57:14.404425:LSYS-ID-00 0.0.0.0/1-->224.0.0.1/1;igmp,ipid-0,ge-0/0/0.0,Dropped by FLOW:First path Invalid zone
+11:57:14.404421:LSYS-ID-00 0.0.0.0/1-->224.0.0.1/1;igmp,ipid-0,ge-0/0/1.0,Dropped by FLOW:First path Invalid zone
+11:57:14.404411:LSYS-ID-00 0.0.0.0/1-->224.0.0.1/1;igmp,ipid-0,ge-0/0/2.0,Dropped by FLOW:First path Invalid zone
+Total packet-drop records: 13
+
+jcluser@vSRX1> edit 
+Entering configuration mode
+[edit]
+jcluser@vSRX1# set security zones security-zone trust interfaces ge-0/0/0.0   
+[edit]
+jcluser@vSRX1# set security zones security-zone untrust interfaces ge-0/0/2.0    
+[edit]
+jcluser@vSRX1# commit and-quit 
+
+/config/license/TrialJUNOS986842235.lic:1:(0) TrialJUNOS986842235: Ignoring the license for feature id: 292.This feature is not used by your product.
+commit complete
+Exiting configuration mode
+            
+jcluser@vSRX1> show security packet-drop records 
+12:04:53.053731:LSYS-ID-00 10.100.11.2/57423-->10.100.13.2/9;icmp,ipid-63260,ge-0/0/0.0,Dropped by POLICY:Denied by Policy  default-policy-logical-system-00
+12:04:52.549401:LSYS-ID-00 10.100.11.2/57423-->10.100.13.2/8;icmp,ipid-59420,ge-0/0/0.0,Dropped by POLICY:Denied by Policy  default-policy-logical-system-00
+12:04:52.043808:LSYS-ID-00 10.100.11.2/57423-->10.100.13.2/7;icmp,ipid-51996,ge-0/0/0.0,Dropped by POLICY:Denied by Policy  default-policy-logical-system-00
+12:04:51.539843:LSYS-ID-00 10.100.11.2/57423-->10.100.13.2/6;icmp,ipid-48156,ge-0/0/0.0,Dropped by POLICY:Denied by Policy  default-policy-logical-system-00
+12:04:51.033485:LSYS-ID-00 10.100.11.2/57423-->10.100.13.2/5;icmp,ipid-40988,ge-0/0/0.0,Dropped by POLICY:Denied by Policy  default-policy-logical-system-00
+12:04:50.529089:LSYS-ID-00 10.100.11.2/57423-->10.100.13.2/4;icmp,ipid-36380,ge-0/0/0.0,Dropped by POLICY:Denied by Policy  default-policy-logical-system-00
+12:04:50.023621:LSYS-ID-00 10.100.11.2/57423-->10.100.13.2/3;icmp,ipid-29980,ge-0/0/0.0,Dropped by POLICY:Denied by Policy  default-policy-logical-system-00
+12:04:49.519426:LSYS-ID-00 10.100.11.2/57423-->10.100.13.2/2;icmp,ipid-26396,ge-0/0/0.0,Dropped by POLICY:Denied by Policy  default-policy-logical-system-00
+12:04:49.013536:LSYS-ID-00 10.100.11.2/57423-->10.100.13.2/1;icmp,ipid-19484,ge-0/0/0.0,Dropped by POLICY:Denied by Policy  default-policy-logical-system-00
+---(more)---[abort]
+
+jcluser@vSRX1> edit              
+Entering configuration mode
+[edit]
+jcluser@vSRX1# set security policies from-zone trust to-zone untrust policy ALLOW_ICMP match source-address any 
+[edit] 
+jcluser@vSRX1# set security policies from-zone trust to-zone untrust policy ALLOW_ICMP match destination-address any
+[edit]  
+jcluser@vSRX1# set security policies from-zone trust to-zone untrust policy ALLOW_ICMP match application junos-ping      
+[edit]  
+jcluser@vSRX1# set security policies from-zone trust to-zone untrust policy ALLOW_ICMP then permit
+
+[edit]
+jcluser@vSRX1# commit and-quit 
+
+/config/license/TrialJUNOS986842235.lic:1:(0) TrialJUNOS986842235: Ignoring the license for feature id: 292.This feature is not used by your product.
+commit complete
+Exiting configuration mode
+
+jcluser@vSRX1> show security flow session    
+Session ID: 71, Policy name: ALLOW_ICMP/4, State: Stand-alone, Timeout: 2, Valid
+  In: 10.100.11.2/8272 --> 10.100.13.2/0;icmp, Conn Tag: 0x0, If: ge-0/0/0.0, Pkts: 1, Bytes: 84, 
+  Out: 10.100.13.2/0 --> 10.100.11.2/8272;icmp, Conn Tag: 0x0, If: ge-0/0/2.0, Pkts: 1, Bytes: 84, 
+
+Session ID: 72, Policy name: ALLOW_ICMP/4, State: Stand-alone, Timeout: 2, Valid
+  In: 10.100.11.2/8272 --> 10.100.13.2/1;icmp, Conn Tag: 0x0, If: ge-0/0/0.0, Pkts: 1, Bytes: 84, 
+  Out: 10.100.13.2/1 --> 10.100.11.2/8272;icmp, Conn Tag: 0x0, If: ge-0/0/2.0, Pkts: 1, Bytes: 84, 
+
+Session ID: 73, Policy name: ALLOW_ICMP/4, State: Stand-alone, Timeout: 2, Valid
+  In: 10.100.11.2/8272 --> 10.100.13.2/2;icmp, Conn Tag: 0x0, If: ge-0/0/0.0, Pkts: 1, Bytes: 84, 
+  Out: 10.100.13.2/2 --> 10.100.11.2/8272;icmp, Conn Tag: 0x0, If: ge-0/0/2.0, Pkts: 1, Bytes: 84,
+  
+  Session ID: 74, Policy name: ALLOW_ICMP/4, State: Stand-alone, Timeout: 2, Valid
+  In: 10.100.11.2/8272 --> 10.100.13.2/3;icmp, Conn Tag: 0x0, If: ge-0/0/0.0, Pkts: 1, Bytes: 84, 
+  Out: 10.100.13.2/3 --> 10.100.11.2/8272;icmp, Conn Tag: 0x0, If: ge-0/0/2.0, Pkts: 1, Bytes: 84, 
+
+---(more)---[abort]
+
+jcluser@vSRX1> show security policies hit-count        
+Logical system: root-logical-system
+ Index   From zone        To zone           Name           Policy count
+ 1       trust            untrust           ALLOW_ICMP     40           
+
+Number of policy: 1
+
+jcluser@vSRX1> clear security packet-drop records 
+82 packet-drop records cleared
+
+jcluser@vSRX1> show security packet-drop records 
+12:17:01.806802:LSYS-ID-00 10.100.13.2/10832-->10.100.11.2/54;icmp,ipid-18558,ge-0/0/2.0,Dropped by POLICY:Denied by Policy  default-policy-logical-system-00
+12:17:01.304827:LSYS-ID-00 10.100.13.2/10832-->10.100.11.2/53;icmp,ipid-11390,ge-0/0/2.0,Dropped by POLICY:Denied by Policy  default-policy-logical-system-00
+12:17:00.799499:LSYS-ID-00 10.100.13.2/10832-->10.100.11.2/52;icmp,ipid-7550,ge-0/0/2.0,Dropped by POLICY:Denied by Policy  default-policy-logical-system-00
+12:17:00.296770:LSYS-ID-00 10.100.13.2/10832-->10.100.11.2/51;icmp,ipid-1406,ge-0/0/2.0,Dropped by POLICY:Denied by Policy  default-policy-logical-system-00
+12:16:59.789968:LSYS-ID-00 10.100.13.2/10832-->10.100.11.2/50;icmp,ipid-61309,ge-0/0/2.0,Dropped by POLICY:Denied by Policy  default-policy-logical-system-00
+12:16:59.286694:LSYS-ID-00 10.100.13.2/10832-->10.100.11.2/49;icmp,ipid-54909,ge-0/0/2.0,Dropped by POLICY:Denied by Policy  default-policy-logical-system-00
+12:16:58.779552:LSYS-ID-00 10.100.13.2/10832-->10.100.11.2/48;icmp,ipid-50301,ge-0/0/2.0,Dropped by POLICY:Denied by Policy  default-policy-logical-system-00
+12:16:58.276788:LSYS-ID-00 10.100.13.2/10832-->10.100.11.2/47;icmp,ipid-43389,ge-0/0/2.0,Dropped by POLICY:Denied by Policy  default-policy-logical-system-00
+12:16:57.770589:LSYS-ID-00 10.100.13.2/10832-->10.100.11.2/46;icmp,ipid-39037,ge-0/0/2.0,Dropped by POLICY:Denied by Policy  default-policy-logical-system-00
+---(more)---[abort]
+
+jcluser@vSRX1> clear security packet-drop records 
+299 packet-drop records cleared
+
+jcluser@vSRX1> show security packet-drop records 
+Total packet-drop records: 0
+
+jcluser@vSRX1> show security packet-drop records 
+12:20:09.407889:LSYS-ID-00 0.0.0.0/1-->224.0.0.1/1;igmp,ipid-0,ge-0/0/0.0,Dropped by FLOW:First path Self but not interested
+12:20:09.407879:LSYS-ID-00 0.0.0.0/1-->224.0.0.1/1;igmp,ipid-0,ge-0/0/1.0,Dropped by FLOW:First path Invalid zone
+12:20:09.407871:LSYS-ID-00 0.0.0.0/1-->224.0.0.1/1;igmp,ipid-0,ge-0/0/2.0,Dropped by FLOW:First path Self but not interested
+12:20:06.904805:LSYS-ID-00 10.100.13.2/51897-->10.100.11.2/443;tcp,ipid-52123,ge-0/0/2.0,Dropped by POLICY:Denied by Policy  default-policy-logical-system-00
+12:20:03.722064:LSYS-ID-00 10.100.13.2/51897-->10.100.11.2/443;tcp,ipid-21403,ge-0/0/2.0,Dropped by POLICY:Denied by Policy  default-policy-logical-system-00
+12:20:00.702623:LSYS-ID-00 10.100.13.2/51897-->10.100.11.2/443;tcp,ipid-62874,ge-0/0/2.0,Dropped by POLICY:Denied by Policy  default-policy-logical-system-00
+Total packet-drop records: 6
+
+jcluser@vSRX1> edit 
+Entering configuration mode
+[edit]
+jcluser@vSRX1# set security policies from-zone untrust to-zone trust policy ALLOW_HTTPS match source-address any               
+
+[edit]
+jcluser@vSRX1# set security policies from-zone untrust to-zone trust policy ALLOW_HTTPS match destination-address any 
+
+[edit]
+jcluser@vSRX1# set security policies from-zone untrust to-zone trust policy ALLOW_HTTPS match application junos-https          
+
+[edit]
+jcluser@vSRX1# set security policies from-zone untrust to-zone trust policy ALLOW_HTTPS then permit                      
+
+[edit]
+jcluser@vSRX1# commit and-quit 
+
+/config/license/TrialJUNOS986842235.lic:1:(0) TrialJUNOS986842235: Ignoring the license for feature id: 292.This feature is not used by your product.
+commit complete
+Exiting configuration mode
+
+jcluser@vSRX1> show security flow session    
+Session ID: 433, Policy name: ALLOW_HTTPS/5, State: Stand-alone, Timeout: 2, Valid
+  In: 10.100.13.2/56417 --> 10.100.11.2/443;tcp, Conn Tag: 0x0, If: ge-0/0/2.0, Pkts: 1, Bytes: 64, 
+  Out: 10.100.11.2/443 --> 10.100.13.2/56417;tcp, Conn Tag: 0x0, If: ge-0/0/0.0, Pkts: 1, Bytes: 40, 
+Total sessions: 1
+
+jcluser@vSRX1> show security policies hit-count 
+Logical system: root-logical-system
+ Index   From zone        To zone           Name           Policy count
+ 1       trust            untrust           ALLOW_ICMP     40           
+ 2       untrust          trust             ALLOW_HTTPS    2            
+
+Number of policy: 2
+
