@@ -1,0 +1,598 @@
+jcluser@vSRX1> show configuration interfaces 
+ge-0/0/0 {
+    unit 0 {
+        family inet {
+            address 10.100.11.1/24;
+        }
+    }
+}
+ge-0/0/1 {
+    unit 0 {
+        family inet {
+            address 10.100.12.1/24;
+        }
+    }
+}
+ge-0/0/2 {
+    unit 0 {
+        family inet {
+            address 10.100.13.1/24;
+        }
+    }
+}
+fxp0 {
+    unit 0 {
+        family inet {
+            dhcp;
+        }
+    }
+}
+---(more)---[abort]
+
+jcluser@vSRX1> edit  
+Entering configuration mode
+[edit]
+jcluser@vSRX1# delete interfaces ge-0/0/2.0 family inet address 10.100.13.1/24 
+[edit]
+jcluser@vSRX1# set interfaces ge-0/0/2.0 family inet address 200.0.13.1/30       
+[edit]
+jcluser@vSRX1# commit and-quit 
+jcluser@vSRX1> show configuration interfaces ge-0/0/2 
+unit 0 {
+    family inet {
+        address 200.0.13.1/30;
+    }
+}
+
+
+
+
+jcluser@Host3> show configuration interfaces 
+ge-0/0/2 {
+    unit 0 {
+        family inet {
+            address 10.100.13.2/24;
+        }
+    }
+}
+fxp0 {
+    unit 0 {
+        family inet {
+            address 100.123.1.2/16;
+        }
+    }
+}
+
+jcluser@Host3> edit   
+Entering configuration mode
+[edit]
+jcluser@Host3# delete interfaces ge-0/0/2.0 inet address 10.100.13.2/24  
+[edit]
+jcluser@Host3# set interfaces ge/0/2.0 family inet address 200.0.13.2/30 
+[edit]
+jcluser@Host3# commit and-quit 
+commit complete
+Exiting configuration mode
+jcluser@Host3> show configuration interfaces 
+ge-0/0/2 {
+    unit 0 {
+        family inet {
+            address 200.0.13.2/30;
+        }
+    }
+}
+fxp0 {
+    unit 0 {
+        family inet {
+            address 100.123.1.2/16;
+        }
+    }
+}
+
+
+
+
+jcluser@Host1> show route 
+
+inet.0: 7 destinations, 7 routes (7 active, 0 holddown, 0 hidden)
++ = Active Route, - = Last Active, * = Both
+
+0.0.0.0/0          *[Static/5] 00:29:43
+                    >  to 100.123.0.1 via fxp0.0
+10.100.11.0/24     *[Direct/0] 00:27:07
+                    >  via ge-0/0/0.0
+10.100.11.2/32     *[Local/0] 00:27:07
+                       Local via ge-0/0/0.0
+10.100.12.0/24     *[Static/5] 00:27:07
+                    >  to 10.100.11.1 via ge-0/0/0.0
+10.100.13.0/24     *[Static/5] 00:27:07
+                    >  to 10.100.11.1 via ge-0/0/0.0
+100.123.0.0/16     *[Direct/0] 00:29:43
+                    >  via fxp0.0
+100.123.1.0/32     *[Local/0] 00:29:43
+                       Local via fxp0.0
+
+inet6.0: 1 destinations, 1 routes (1 active, 0 holddown, 0 hidden)
++ = Active Route, - = Last Active, * = Both
+
+ff02::2/128        *[INET6/0] 00:30:43
+                       MultiRecv
+
+jcluser@Host1> edit       
+Entering configuration mode
+
+[edit]
+jcluser@Host1# set routing-options static route 200.0.13.0/30 next-hop 10.100.11.1            
+
+[edit]
+jcluser@Host1# commit and-quit 
+commit complete
+Exiting configuration mode					   
+					   
+
+
+
+jcluser@Host1> ping 200.0.13.2 rapid count 5    
+PING 200.0.13.2 (200.0.13.2): 56 data bytes
+.....
+--- 200.0.13.2 ping statistics ---
+5 packets transmitted, 0 packets received, 100% packet loss
+
+
+
+jcluser@vSRX1> show security flow session | refresh    
+---(refreshed at 2025-09-10 07:33:31 UTC)---
+Total sessions: 0
+---(refreshed at 2025-09-10 07:33:36 UTC)---
+Session ID: 59, Policy name: default-permit/5, State: Stand-alone, Timeout: 60, Valid
+  In: 10.100.11.2/50001 --> 200.0.13.2/0;icmp, Conn Tag: 0x0, If: ge-0/0/0.0, Pkts: 1, Bytes: 84, 
+  Out: 200.0.13.2/0 --> 10.100.11.2/50001;icmp, Conn Tag: 0x0, If: ge-0/0/2.0, Pkts: 0, Bytes: 0, 
+Total sessions: 1
+---(refreshed at 2025-09-10 07:33:41 UTC)---
+Session ID: 59, Policy name: default-permit/5, State: Stand-alone, Timeout: 56, Valid
+  In: 10.100.11.2/50001 --> 200.0.13.2/0;icmp, Conn Tag: 0x0, If: ge-0/0/0.0, Pkts: 1, Bytes: 84, 
+  Out: 200.0.13.2/0 --> 10.100.11.2/50001;icmp, Conn Tag: 0x0, If: ge-0/0/2.0, Pkts: 0, Bytes: 0, 
+
+Session ID: 60, Policy name: default-permit/5, State: Stand-alone, Timeout: 56, Valid
+  In: 10.100.11.2/50001 --> 200.0.13.2/1;icmp, Conn Tag: 0x0, If: ge-0/0/0.0, Pkts: 1, Bytes: 84, 
+  Out: 200.0.13.2/1 --> 10.100.11.2/50001;icmp, Conn Tag: 0x0, If: ge-0/0/2.0, Pkts: 0, Bytes: 0, 
+  ---(*more)---[abort]
+  
+  
+  
+  
+  jcluser@Host3> show route 
+
+inet.0: 5 destinations, 5 routes (5 active, 0 holddown, 0 hidden)
++ = Active Route, - = Last Active, * = Both
+
+0.0.0.0/0          *[Static/5] 00:39:15
+                    >  to 100.123.0.1 via fxp0.0
+100.123.0.0/16     *[Direct/0] 00:39:15
+                    >  via fxp0.0
+100.123.1.2/32     *[Local/0] 00:39:15
+                       Local via fxp0.0
+200.0.13.0/30      *[Direct/0] 00:11:34
+                    >  via ge-0/0/2.0
+200.0.13.2/32      *[Local/0] 00:11:34
+                       Local via ge-0/0/2.0
+
+inet6.0: 1 destinations, 1 routes (1 active, 0 holddown, 0 hidden)
++ = Active Route, - = Last Active, * = Both
+
+ff02::2/128        *[INET6/0] 00:40:17
+                       MultiRecv
+
+
+jcluser@Host3> edit 
+Entering configuration mode
+
+[edit]
+jcluser@Host3# set routing-options static route 1.1.1.0/30 next-hop 200.0.13.1                
+
+[edit]
+jcluser@Host3# set routing-options static route 2.2.2.2/32 next-hop 200.0.13.1               
+
+[edit]
+jcluser@Host3# commit and-quit 
+commit complete
+Exiting configuration mode
+
+jcluser@Host3> show route                       
+
+inet.0: 7 destinations, 7 routes (7 active, 0 holddown, 0 hidden)
++ = Active Route, - = Last Active, * = Both
+
+0.0.0.0/0          *[Static/5] 01:12:36
+                    >  to 100.123.0.1 via fxp0.0
+1.1.1.0/30         *[Static/5] 00:07:15
+                    >  to 200.0.13.1 via ge-0/0/2.0
+2.2.2.2/32         *[Static/5] 00:07:15
+                    >  to 200.0.13.1 via ge-0/0/2.0
+100.123.0.0/16     *[Direct/0] 01:12:36
+                    >  via fxp0.0
+100.123.1.2/32     *[Local/0] 01:12:36
+                       Local via fxp0.0
+200.0.13.0/30      *[Direct/0] 00:44:55
+                    >  via ge-0/0/2.0
+200.0.13.2/32      *[Local/0] 00:44:55
+                       Local via ge-0/0/2.0
+
+inet6.0: 1 destinations, 1 routes (1 active, 0 holddown, 0 hidden)
++ = Active Route, - = Last Active, * = Both
+
+ff02::2/128        *[INET6/0] 01:13:38
+                       MultiRecv
+
+
+
+
+
+jcluser@vSRX1> edit 
+Entering configuration mode
+
+[edit]
+jcluser@vSRX1# set security nat source pool pool1 address 1.1.1.0/30 
+
+[edit]
+jcluser@vSRX1# set interfaces lo0.0 family inet address 1.1.1.0/32   
+          
+[edit]
+jcluser@vSRX1# set interfaces lo0.0 family inet address 1.1.1.1/32            
+
+[edit]
+jcluser@vSRX1# set interfaces lo0.0 family inet address 1.1.1.2/32            
+
+[edit]
+jcluser@vSRX1# set interfaces lo0.0 family inet address 1.1.1.3/32  
+ 
+[edit]
+jcluser@vSRX1# commit and-quit 
+
+jcluser@vSRX1> show configuration interfaces lo0 
+unit 0 {
+    family inet {
+        address 1.1.1.1/32;
+        address 1.1.1.2/32;
+        address 1.1.1.3/32;
+        address 1.1.1.0/32;
+    }
+}
+
+jcluser@vSRX1> edit 
+Entering configuration mode
+
+[edit]
+jcluser@vSRX1# set security nat source rule-set INTERNAL_HOSTS_TO_UNTRUST from zone trust      
+
+[edit]
+jcluser@vSRX1# set security nat source rule-set INTERNAL_HOSTS_TO_UNTRUST to zone untrust   
+
+[edit]
+jcluser@vSRX1# set security nat source rule-set INTERNAL_HOSTS_TO_UNTRUST rule IP_POOL_NAT match source-address 10.100.0.0/16   
+
+[edit]
+jcluser@vSRX1# set security nat source rule-set INTERNAL_HOSTS_TO_UNTRUST rule IP_POOL_NAT match destination-address 0.0.0.0/0   
+
+[edit]
+jcluser@vSRX1# set security nat source rule-set INTERNAL_HOSTS_TO_UNTRUST rule IP_POOL_NAT then source-nat pool pool1
+
+[edit]
+jcluser@vSRX1# commit and-quit 
+
+jcluser@vSRX1> show security nat source rule all 
+Total rules: 1
+Total referenced IPv4/IPv6 ip-prefixes: 2/0
+source NAT rule: IP_POOL_NAT            Rule-set: INTERNAL_HOSTS_TO_UNTRUST
+  Rule-Id                    : 1
+  Rule position              : 1
+  From zone                  : trust
+  To zone                    : untrust
+  Match
+    Source addresses         : 10.100.0.0      - 10.100.255.255
+    Destination addresses    : 0.0.0.0         - 255.255.255.255
+  Action                        : pool1
+    Persistent NAT type         : N/A 
+    Persistent NAT mapping type : address-port-mapping 
+    Inactivity timeout          : 0
+    Max session number          : 0
+  Translation hits           : 0
+    Successful sessions      : 0
+  Number of sessions         : 0
+  
+  
+
+
+jcluser@Host1> ping 200.0.13.2 rapid count 5    
+PING 200.0.13.2 (200.0.13.2): 56 data bytes
+!!!!!
+--- 200.0.13.2 ping statistics ---
+5 packets transmitted, 5 packets received, 0% packet loss
+round-trip min/avg/max/stddev = 1.089/1.280/1.566/0.162 ms
+
+jcluser@vSRX1> show security flow session | refresh    
+---(refreshed at 2025-09-10 08:04:14 UTC)---
+Total sessions: 0
+---(refreshed at 2025-09-10 08:04:19 UTC)---
+Total sessions: 0
+---(refreshed at 2025-09-10 08:04:24 UTC)---
+Total sessions: 0
+---(refreshed at 2025-09-10 08:04:29 UTC)---
+Session ID: 124, Policy name: default-permit/5, State: Stand-alone, Timeout: 4, Valid
+  In: 10.100.11.2/48978 --> 200.0.13.2/0;icmp, Conn Tag: 0x0, If: ge-0/0/0.0, Pkts: 1, Bytes: 84, 
+  Out: 200.0.13.2/0 --> 1.1.1.3/8711;icmp, Conn Tag: 0x0, If: ge-0/0/2.0, Pkts: 1, Bytes: 84, 
+
+Session ID: 125, Policy name: default-permit/5, State: Stand-alone, Timeout: 4, Valid
+  In: 10.100.11.2/48978 --> 200.0.13.2/1;icmp, Conn Tag: 0x0, If: ge-0/0/0.0, Pkts: 1, Bytes: 84, 
+  Out: 200.0.13.2/1 --> 1.1.1.0/12649;icmp, Conn Tag: 0x0, If: ge-0/0/2.0, Pkts: 1, Bytes: 84, 
+  ---(*more 100%)---[abort]
+  
+  
+
+
+jcluser@Host2> edit                           
+Entering configuration mode
+
+[edit]
+jcluser@Host2# set routing-options static route 200.0.13.0/30 next-hop 10.100.12.1            
+
+[edit]
+jcluser@Host2# commit and-quit 
+commit complete
+Exiting configuration mode
+
+jcluser@vSRX1> edit 
+Entering configuration mode
+
+[edit]
+jcluser@vSRX1# set interfaces lo0.0 family unit 2.2.2.2/32  
+[edit]
+jcluser@vSRX1# commit and-quit  
+
+
+jcluser@Host2> ping 200.0.13.2 rapid count 5    
+PING 200.0.13.2 (200.0.13.2): 56 data bytes
+!!!!!
+--- 200.0.13.2 ping statistics ---
+5 packets transmitted, 5 packets received, 0% packet loss
+round-trip min/avg/max/stddev = 0.864/1.143/1.710/0.305 ms
+
+
+
+jcluser@vSRX1> show security flow session | refresh 
+---(refreshed at 2025-09-10 08:53:04 UTC)---
+Total sessions: 0
+---(refreshed at 2025-09-10 08:53:09 UTC)---
+Session ID: 213, Policy name: default-permit/5, State: Stand-alone, Timeout: 4, Valid
+  In: 10.100.12.2/2644 --> 200.0.13.2/0;icmp, Conn Tag: 0x0, If: ge-0/0/1.0, Pkts: 1, Bytes: 84, 
+  Out: 200.0.13.2/0 --> 1.1.1.3/10862;icmp, Conn Tag: 0x0, If: ge-0/0/2.0, Pkts: 1, Bytes: 84, 
+
+Session ID: 214, Policy name: default-permit/5, State: Stand-alone, Timeout: 4, Valid
+  In: 10.100.12.2/2644 --> 200.0.13.2/1;icmp, Conn Tag: 0x0, If: ge-0/0/1.0, Pkts: 1, Bytes: 84, 
+  Out: 200.0.13.2/1 --> 1.1.1.0/25773;icmp, Conn Tag: 0x0, If: ge-0/0/2.0, Pkts: 1, Bytes: 84, 
+
+Session ID: 215, Policy name: default-permit/5, State: Stand-alone, Timeout: 4, Valid
+  In: 10.100.12.2/2644 --> 200.0.13.2/2;icmp, Conn Tag: 0x0, If: ge-0/0/1.0, Pkts: 1, Bytes: 84, 
+  Out: 200.0.13.2/2 --> 1.1.1.1/28288;icmp, Conn Tag: 0x0, If: ge-0/0/2.0, Pkts: 1, Bytes: 84, 
+---(*more 100%)---[abort]
+
+
+
+jcluser@vSRX1> show configuration security nat | display set                   
+set security nat source pool pool1 address 1.1.1.0/30
+set security nat source rule-set INTERNAL_HOSTS_TO_UNTRUST from zone trust
+set security nat source rule-set INTERNAL_HOSTS_TO_UNTRUST to zone untrust
+set security nat source rule-set INTERNAL_HOSTS_TO_UNTRUST rule IP_POOL_NAT match source-address 10.100.0.0/16
+set security nat source rule-set INTERNAL_HOSTS_TO_UNTRUST rule IP_POOL_NAT match destination-address 0.0.0.0/0
+set security nat source rule-set INTERNAL_HOSTS_TO_UNTRUST rule IP_POOL_NAT then source-nat pool pool1
+
+jcluser@vSRX1> edit 
+Entering configuration mode
+
+[edit]
+jcluser@vSRX1# set security nat source pool pool2 address 2.2.2.2/32           
+
+[edit]
+jcluser@vSRX1# delete security nat source rule-set INTERNAL_HOSTS_TO_UNTRUST rule IP_POOL_NAT  
+
+[edit]
+jcluser@vSRX1# set security nat source rule-set INTERNAL_HOSTS_TO_UNTRUST rule IP_POOL1_NAT source-address 10.100.11.0/24                
+
+[edit]
+jcluser@vSRX1# set security nat source rule-set INTERNAL_HOSTS_TO_UNTRUST rule IP_POOL1_NAT destination-address 0.0.0.0/0                      
+
+[edit]
+jcluser@vSRX1# ...NAT then source-nat pool pool1             
+
+[edit]
+jcluser@vSRX1# ...source-address 10.100.12.0/24                
+
+[edit]
+jcluser@vSRX1# ...ation-address 0.0.0.0/0                      
+
+[edit]
+jcluser@vSRX1# ...NAT then source-nat pool pool2  
+
+
+
+[edit]
+jcluser@vSRX1# show | compare 
+[edit security nat source]
+      pool pool1 { ... }
++     pool pool2 {
++         address {
++             2.2.2.2/32;
++         }
++     }
+[edit security nat source rule-set INTERNAL_HOSTS_TO_UNTRUST]
++      rule IP_POOL1_NAT {
++          match {
++              source-address 10.100.11.0/24;
++              destination-address 0.0.0.0/0;
++          }
++          then {
++              source-nat {
++                  pool {
++                      pool1;
++                  }
++              }
++          }
++      }
++      rule IP_POOL2_NAT {
++          match {
++              source-address 10.100.12.0/24;
++              destination-address 0.0.0.0/0;
++          }
++          then {
++              source-nat {
++					pool {               
++                      pool2;           
++                  }                    
++              }                        
++          }                            
++      }                                
+-      rule IP_POOL_NAT {               
+-          match {                      
+-              source-address 10.100.0.0/16;
+-              destination-address 0.0.0.0/0;
+-          }                            
+-          then {                       
+-              source-nat {             
+-                  pool {               
+-                      pool1;           
+-                  }                    
+-              }                        
+-          }                            
+-      }                                
+                          
+						  
+[edit]
+jcluser@vSRX1# commit and-quit 
+
+jcluser@vSRX1> show security nat source rule all 
+Total rules: 2
+Total referenced IPv4/IPv6 ip-prefixes: 4/0
+source NAT rule: IP_POOL1_NAT           Rule-set: INTERNAL_HOSTS_TO_UNTRUST
+  Rule-Id                    : 2
+  Rule position              : 1
+  From zone                  : trust
+  To zone                    : untrust
+  Match
+    Source addresses         : 10.100.11.0     - 10.100.11.255
+    Destination addresses    : 0.0.0.0         - 255.255.255.255
+  Action                        : pool1
+    Persistent NAT type         : N/A 
+    Persistent NAT mapping type : address-port-mapping 
+    Inactivity timeout          : 0
+    Max session number          : 0
+  Translation hits           : 0
+    Successful sessions      : 0
+  Number of sessions         : 0
+source NAT rule: IP_POOL2_NAT           Rule-set: INTERNAL_HOSTS_TO_UNTRUST
+  Rule-Id                    : 3
+  Rule position              : 2
+  From zone                  : trust
+  To zone                    : untrust
+  Match
+    Source addresses         : 10.100.12.0     - 10.100.12.255
+    Destination addresses    : 0.0.0.0         - 255.255.255.255
+  Action                        : pool2 
+    Persistent NAT type         : N/A   
+    Persistent NAT mapping type : address-port-mapping 
+    Inactivity timeout          : 0     
+    Max session number          : 0     
+  Translation hits           : 0        
+    Successful sessions      : 0        
+  Number of sessions         : 0        
+  
+  
+  
+
+jcluser@Host1> ping 200.0.13.2 
+PING 200.0.13.2 (200.0.13.2): 56 data bytes
+64 bytes from 200.0.13.2: icmp_seq=0 ttl=63 time=1.961 ms
+64 bytes from 200.0.13.2: icmp_seq=1 ttl=63 time=1.304 ms
+64 bytes from 200.0.13.2: icmp_seq=2 ttl=63 time=1.682 ms
+64 bytes from 200.0.13.2: icmp_seq=3 ttl=63 time=1.523 ms
+64 bytes from 200.0.13.2: icmp_seq=4 ttl=63 time=1.599 ms
+.
+.
+.
+--- 200.0.13.2 ping statistics ---
+42 packets transmitted, 42 packets received, 0% packet loss
+round-trip min/avg/max/stddev = 1.045/1.858/5.592/1.172 ms
+
+
+jcluser@vSRX1> show security nat source rule IP_POOL1_NAT   
+source NAT rule: IP_POOL1_NAT           Rule-set: INTERNAL_HOSTS_TO_UNTRUST
+  Rule-Id                    : 2
+  Rule position              : 1
+  From zone                  : trust
+  To zone                    : untrust
+  Match
+    Source addresses         : 10.100.11.0     - 10.100.11.255
+    Destination addresses    : 0.0.0.0         - 255.255.255.255
+  Action                        : pool1
+    Persistent NAT type         : N/A 
+    Persistent NAT mapping type : address-port-mapping 
+    Inactivity timeout          : 0
+    Max session number          : 0
+  Translation hits           : 33
+    Successful sessions      : 33
+  Number of sessions         : 5
+  
+  
+
+jcluser@Host1> ping 200.0.13.2    
+PING 200.0.13.2 (200.0.13.2): 56 data bytes
+64 bytes from 200.0.13.2: icmp_seq=0 ttl=63 time=1.526 ms
+.
+.
+--- 200.0.13.2 ping statistics ---
+13 packets transmitted, 13 packets received, 0% packet loss
+round-trip min/avg/max/stddev = 1.070/1.392/1.585/0.157 ms
+
+
+jcluser@vSRX1> show security flow session    
+Session ID: 288, Policy name: default-permit/5, State: Stand-alone, Timeout: 2, Valid
+  In: 10.100.11.2/37972 --> 200.0.13.2/1;icmp, Conn Tag: 0x0, If: ge-0/0/0.0, Pkts: 1, Bytes: 84, 
+  Out: 200.0.13.2/1 --> 1.1.1.3/6018;icmp, Conn Tag: 0x0, If: ge-0/0/2.0, Pkts: 1, Bytes: 84, 
+
+Session ID: 289, Policy name: default-permit/5, State: Stand-alone, Timeout: 2, Valid
+  In: 10.100.11.2/37972 --> 200.0.13.2/2;icmp, Conn Tag: 0x0, If: ge-0/0/0.0, Pkts: 1, Bytes: 84, 
+  Out: 200.0.13.2/2 --> 1.1.1.0/3199;icmp, Conn Tag: 0x0, If: ge-0/0/2.0, Pkts: 1, Bytes: 84, 
+
+Session ID: 290, Policy name: default-permit/5, State: Stand-alone, Timeout: 4, Valid
+  In: 10.100.11.2/37972 --> 200.0.13.2/3;icmp, Conn Tag: 0x0, If: ge-0/0/0.0, Pkts: 1, Bytes: 84, 
+  Out: 200.0.13.2/3 --> 1.1.1.1/25922;icmp, Conn Tag: 0x0, If: ge-0/0/2.0, Pkts: 1, Bytes: 84, 
+Total sessions: 3
+
+
+
+
+jcluser@Host2> ping 200.0.13.2                  
+PING 200.0.13.2 (200.0.13.2): 56 data bytes
+64 bytes from 200.0.13.2: icmp_seq=0 ttl=63 time=1.627 ms
+64 bytes from 200.0.13.2: icmp_seq=1 ttl=63 time=1.275 ms
+.
+.
+.
+.
+--- 200.0.13.2 ping statistics ---
+20 packets transmitted, 20 packets received, 0% packet loss
+round-trip min/avg/max/stddev = 1.212/1.761/5.904/1.098 ms
+
+
+jcluser@vSRX1> show security flow session    
+Session ID: 304, Policy name: default-permit/5, State: Stand-alone, Timeout: 2, Valid
+  In: 10.100.12.2/37460 --> 200.0.13.2/4;icmp, Conn Tag: 0x0, If: ge-0/0/1.0, Pkts: 1, Bytes: 84, 
+  Out: 200.0.13.2/4 --> 2.2.2.2/10943;icmp, Conn Tag: 0x0, If: ge-0/0/2.0, Pkts: 1, Bytes: 84, 
+
+Session ID: 305, Policy name: default-permit/5, State: Stand-alone, Timeout: 2, Valid
+  In: 10.100.12.2/37460 --> 200.0.13.2/5;icmp, Conn Tag: 0x0, If: ge-0/0/1.0, Pkts: 1, Bytes: 84, 
+  Out: 200.0.13.2/5 --> 2.2.2.2/28479;icmp, Conn Tag: 0x0, If: ge-0/0/2.0, Pkts: 1, Bytes: 84, 
+
+Session ID: 306, Policy name: default-permit/5, State: Stand-alone, Timeout: 4, Valid
+  In: 10.100.12.2/37460 --> 200.0.13.2/6;icmp, Conn Tag: 0x0, If: ge-0/0/1.0, Pkts: 1, Bytes: 84, 
+  Out: 200.0.13.2/6 --> 2.2.2.2/24451;icmp, Conn Tag: 0x0, If: ge-0/0/2.0, Pkts: 1, Bytes: 84, 
+Total sessions: 3
