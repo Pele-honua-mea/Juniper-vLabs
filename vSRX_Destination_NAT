@@ -1,0 +1,573 @@
+jcluser@vSRX1> show configuration interfaces 
+ge-0/0/0 {
+    unit 0 {
+        family inet {
+            address 10.100.11.1/24;
+        }
+    }
+}
+ge-0/0/1 {
+    unit 0 {
+        family inet {
+            address 10.100.12.1/24;
+        }
+    }
+}
+ge-0/0/2 {
+    unit 0 {
+        family inet {
+            address 10.100.13.1/24;
+        }
+    }
+}
+fxp0 {
+    unit 0 {
+        family inet {
+            dhcp;
+        }
+    }
+}
+---(more)---[abort]
+jcluser@vSRX1> edit       
+Entering configuration mode
+
+[edit]
+jcluser@vSRX1# delete interfaces ge-0/0/2.0 family inet address 10.100.13.1/24                 
+
+[edit]
+jcluser@vSRX1# set interfaces ge-0/0/2.0 family inet address 200.0.13.1/30  
+
+[edit]
+jcluser@vSRX1# commit 
+
+[edit]
+jcluser@vSRX1# set interfaces lo0.0 family inet address 1.1.1.1/24             
+
+[edit]
+jcluser@vSRX1# set interfaces lo0.0 family inet address 2.2.2.2/24
+
+[edit]
+jcluser@vSRX1# commit and-quit 
+commit complete
+Exiting configuration mode 
+
+
+
+jcluser@Host3> show configuration interfaces 
+ge-0/0/2 {
+    unit 0 {
+        family inet {
+            address 10.100.13.2/24;
+        }
+    }
+}
+fxp0 {
+    unit 0 {
+        family inet {
+            address 100.123.1.2/16;
+        }
+    }
+}
+
+jcluser@Host3> edit     
+Entering configuration mode
+
+[edit]
+jcluser@Host3# delete interfaces ge-0/0/2.0 inet address 10.100.13.2/24                 
+
+[edit]
+jcluser@Host3# set interfaces ge-0/0/2.0 family inet address 200.0.13.2/30    
+
+[edit]
+jcluser@Host3# commit 
+commit complete
+
+
+
+jcluser@Host1> edit 
+Entering configuration mode
+
+[edit]
+jcluser@Host1# set system host-name Server1 
+[edit]
+jcluser@Host1# commit 
+commit complete
+
+[edit]
+jcluser@Server1# set routing-options static route 200.0.13.0/30 next-hop 10.100.11.1           
+
+[edit]
+jcluser@Server1# commit and-quit 
+commit complete
+Exiting configuration mode
+
+
+jcluser@Host2> edit 
+Entering configuration mode
+
+[edit]
+jcluser@Host2# set system host-name Server2 
+
+[edit]
+jcluser@Host2# commit 
+commit complete
+
+[edit]
+jcluser@Server2# set routing-options static route 200.0.13.0/30 next-hop 10.100.12.1          
+
+[edit]
+jcluser@Server2# commit and-quit 
+commit complete
+Exiting configuration mode
+
+
+jcluser@Host3> edit 
+Entering configuration mode
+
+[edit]
+jcluser@Host3# set routing-options static route 1.1.1.0/24 next-hop 200.0.13.1                
+
+[edit]
+jcluser@Host3# set routing-options static route 2.2.2.0/24 next-hop 200.0.13.1               
+
+[edit]
+jcluser@Host3# commit and-quit 
+commit complete
+Exiting configuration mode
+
+
+
+jcluser@vSRX1> show configuration security zones | display set                 
+set security zones security-zone trust host-inbound-traffic system-services any-service
+set security zones security-zone trust interfaces ge-0/0/0.0
+set security zones security-zone trust interfaces ge-0/0/1.0
+set security zones security-zone untrust interfaces ge-0/0/2.0
+
+jcluster@vSRX1> edit
+Entering configuration mode
+
+[edit]
+jcluser@vSRX1# delete security-policies policies from-zone trust to-zone trust policy default-permit   
+
+[edit]
+jcluser@vSRX1# delete security policies from-zone trust to-zone untrust policy default-permit      
+
+[edit]
+jcluser@vSRX1# delete security zones security-zone trust
+
+[edit]
+jcluser@vSRX1# commit and-quit  
+commit complete
+Exiting configuration mode
+
+jcluser@vSRX1> show configuration security zones | display set                 
+set security zones security-zone dmz interfaces ge-0/0/0.0
+set security zones security-zone dmz interfaces ge-0/0/1.0
+
+jcluser@vSRX1> edit 
+Entering configuration mode
+
+[edit]
+jcluser@vSRX1# set security zones security-zone dmz host-inbound-traffic system-services any-service           
+
+[edit]
+jcluser@vSRX1# set security zones security-zone untrust interfaces ge-0/0/2.0                 
+
+[edit]
+jcluser@vSRX1# commit and-quit 
+
+/config/license/TrialJUNOS986842235.lic:1:(0) TrialJUNOS986842235: Ignoring the license for feature id: 292.This feature is not used by your product.
+commit complete
+Exiting configuration mode
+
+jcluser@vSRX1> show configuration security zones | display set                 
+set security zones security-zone dmz host-inbound-traffic system-services any-service
+set security zones security-zone dmz interfaces ge-0/0/0.0
+set security zones security-zone dmz interfaces ge-0/0/1.0
+set security zones security-zone untrust interfaces ge-0/0/2.0
+
+jcluser@vSRX1> show security zones 
+
+Security zone: dmz
+  Zone ID: 10
+  Send reset for non-SYN session TCP packets: Off
+  Policy configurable: Yes  
+  Interfaces bound: 2
+  Interfaces:
+    ge-0/0/0.0
+    ge-0/0/1.0
+  Advanced-connection-tracking timeout: 1800
+  Unidirectional-session-refreshing: No
+
+Security zone: untrust
+  Zone ID: 7
+  Send reset for non-SYN session TCP packets: Off
+  Policy configurable: Yes  
+  Interfaces bound: 1
+  Interfaces:
+    ge-0/0/2.0
+  Advanced-connection-tracking timeout: 1800
+  Unidirectional-session-refreshing: No
+
+Security zone: junos-host
+  Zone ID: 2
+  Send reset for non-SYN session TCP packets: Off
+  Policy configurable: Yes 
+  Interfaces bound: 0
+  Interfaces:
+---(more)---[abort]
+
+jcluser@vSRX1> edit 
+Entering configuration mode
+
+[edit]
+jcluser@vSRX1# set security zones security-zone dmz address-book address DMZ_SERVER1 10.100.11.2/32           
+
+[edit]
+jcluser@vSRX1# set security zones security-zone dmz address-book address DMZ_SERVER2 10.100.12.2/32    
+
+[edit]
+jcluser@vSRX1# set security policies from-zone untrust to-zone dmz policy to_web_server match source-address any  
+
+[edit]
+jcluser@vSRX1# set security policies from-zone untrust to-zone dmz policy to_web_server match destination-address DMZ_SERVER1 
+
+[edit]
+jcluser@vSRX1# set security policies from-zone untrust to-zone dmz policy to_web_server match destination-address DMZ_SERVER2  
+
+[edit]
+jcluser@vSRX1# set security policies from-zone untrust to-zone dmz policy to_web_server match application junos-https 
+
+[edit]
+jcluser@vSRX1# set security policies from-zone untrust to-zone dmz policy to_web_server match application junos-ssh
+
+[edit]
+jcluser@vSRX1# set security policies from-zone untrust to-zone dmz policy to_web_server match application junos-ping 
+
+[edit]
+jcluser@vSRX1# set security policies from-zone untrust to-zone dmz policy to_web_server then permit
+
+[edit]
+jcluser@vSRX1# commit and-quit 
+commit complete
+Exiting configuration mode
+
+jcluser@vSRX1> edit 
+Entering configuration mode
+
+[edit]
+jcluser@vSRX1# set security nat destination pool DMZ_SERVER1_PL address 10.100.11.2/32        
+
+[edit]
+jcluser@vSRX1# set security nat destination rule-set DMZ_SERVER_RS from zone untrust          
+
+[edit]
+jcluser@vSRX1# set security nat destination rule-set DMZ_SERVER_RS rule DMZ_SERVER_RL match destination-address 1.1.1.1/32                    
+
+[edit]
+jcluser@vSRX1# set security nat destination rule-set DMZ_SERVER_RL then destination-nat pool DMZ_SERVER1_PL                  
+
+[edit]
+jcluser@vSRX1# commit and-quit 
+
+
+
+jcluser@Host3> ping 1.1.1.1                   
+PING 1.1.1.1 (1.1.1.1): 56 data bytes
+64 bytes from 1.1.1.1: icmp_seq=0 ttl=63 time=1.190 ms
+64 bytes from 1.1.1.1: icmp_seq=1 ttl=63 time=1.150 ms
+64 bytes from 1.1.1.1: icmp_seq=2 ttl=63 time=1.062 ms
+64 bytes from 1.1.1.1: icmp_seq=3 ttl=63 time=1.194 ms
+64 bytes from 1.1.1.1: icmp_seq=4 ttl=63 time=1.358 ms
+64 bytes from 1.1.1.1: icmp_seq=5 ttl=63 time=1.430 ms
+64 bytes from 1.1.1.1: icmp_seq=6 ttl=63 time=1.332 ms
+^C
+--- 1.1.1.1 ping statistics ---
+8 packets transmitted, 7 packets received, 12% packet loss
+round-trip min/avg/max/stddev = 1.062/1.245/1.430/0.121 ms
+
+
+
+jcluser@vSRX1> show security flow session | refresh 
+---(refreshed at 2025-09-16 09:28:16 UTC)---
+Total sessions: 0
+---(refreshed at 2025-09-16 09:28:21 UTC)---
+.
+.
+.
+Session ID: 192, Policy name: to_web_server/4, State: Stand-alone, Timeout: 2, Valid
+  In: 200.0.13.2/20564 --> 1.1.1.1/5;icmp, Conn Tag: 0x0, If: ge-0/0/2.0, Pkts: 1, Bytes: 84, 
+  Out: 10.100.11.2/5 --> 200.0.13.2/20564;icmp, Conn Tag: 0x0, If: ge-0/0/0.0, Pkts: 1, Bytes: 84, 
+
+Session ID: 193, Policy name: to_web_server/4, State: Stand-alone, Timeout: 4, Valid
+  In: 200.0.13.2/20564 --> 1.1.1.1/6;icmp, Conn Tag: 0x0, If: ge-0/0/2.0, Pkts: 1, Bytes: 84, 
+  Out: 10.100.11.2/6 --> 200.0.13.2/20564;icmp, Conn Tag: 0x0, If: ge-0/0/0.0, Pkts: 1, Bytes: 84, 
+
+Session ID: 194, Policy name: to_web_server/4, State: Stand-alone, Timeout: 4, Valid
+  In: 200.0.13.2/20564 --> 1.1.1.1/7;icmp, Conn Tag: 0x0, If: ge-0/0/2.0, Pkts: 1, Bytes: 84, 
+  Out: 10.100.11.2/7 --> 200.0.13.2/20564;icmp, Conn Tag: 0x0, If: ge-0/0/0.0, Pkts: 1, Bytes: 84, 
+---(*more)---[abort]
+
+
+jcluser@Host3> ssh 1.1.1.1 
+The authenticity of host '1.1.1.1 (1.1.1.1)' can't be established.
+ECDSA key fingerprint is SHA256:Ndf+fnyVBCUHIr0yq5sxQQnO57LsZ4N+YozIRAHMqts.
+Are you sure you want to continue connecting (yes/no)? no
+Host key verification failed.
+
+
+jcluser@vSRX1> show security flow session | refresh          
+---(refreshed at 2025-09-16 09:34:01 UTC)---
+Session ID: 217, Policy name: to_web_server/4, State: Stand-alone, Timeout: 1792, Valid
+  In: 200.0.13.2/61312 --> 1.1.1.1/22;tcp, Conn Tag: 0x0, If: ge-0/0/2.0, Pkts: 7, Bytes: 1925, 
+  Out: 10.100.11.2/22 --> 200.0.13.2/61312;tcp, Conn Tag: 0x0, If: ge-0/0/0.0, Pkts: 5, Bytes: 1865, 
+Total sessions: 1
+---(refreshed at 2025-09-16 09:34:06 UTC)---
+Session ID: 217, Policy name: to_web_server/4, State: Stand-alone, Timeout: 1788, Valid
+  In: 200.0.13.2/61312 --> 1.1.1.1/22;tcp, Conn Tag: 0x0, If: ge-0/0/2.0, Pkts: 7, Bytes: 1925, 
+  Out: 10.100.11.2/22 --> 200.0.13.2/61312;tcp, Conn Tag: 0x0, If: ge-0/0/0.0, Pkts: 5, Bytes: 1865, 
+Total sessions: 1
+---(refreshed at 2025-09-16 09:34:11 UTC)---
+Session ID: 217, Policy name: to_web_server/4, State: Stand-alone, Timeout: 1782, Valid
+  In: 200.0.13.2/61312 --> 1.1.1.1/22;tcp, Conn Tag: 0x0, If: ge-0/0/2.0, Pkts: 7, Bytes: 1925, 
+    Out: 10.100.11.2/22 --> 200.0.13.2/61312;tcp, Conn Tag: 0x0, If: ge-0/0/0.0, Pkts: 5, Bytes: 1865, 
+Total sessions: 1
+---(refreshed at 2025-09-16 09:34:16 UTC)---
+Session ID: 217, Policy name: to_web_server/4, State: Stand-alone, Timeout: 1778, Valid
+  In: 200.0.13.2/61312 --> 1.1.1.1/22;tcp, Conn Tag: 0x0, If: ge-0/0/2.0, Pkts: 7, Bytes: 1925, 
+  Out: 10.100.11.2/22 --> 200.0.13.2/61312;tcp, Conn Tag: 0x0, If: ge-0/0/0.0, Pkts: 5, Bytes: 1865, 
+Total sessions: 1
+---(refreshed at 2025-09-16 09:34:21 UTC)---
+Session ID: 217, Policy name: to_web_server/4, State: Stand-alone, Timeout: 1772, Valid
+  In: 200.0.13.2/61312 --> 1.1.1.1/22;tcp, Conn Tag: 0x0, If: ge-0/0/2.0, Pkts: 7, Bytes: 1925, 
+  Out: 10.100.11.2/22 --> 200.0.13.2/61312;tcp, Conn Tag: 0x0, If: ge-0/0/0.0, Pkts: 5, Bytes: 1865, 
+Total sessions: 1
+---(refreshed at 2025-09-16 09:34:26 UTC)---
+Total sessions: 0
+---(*more 100%)---[abort]
+
+
+jcluser@Host3> telnet port 443 1.1.1.1    
+Trying 1.1.1.1...
+telnet: connect to address 1.1.1.1: Connection refused
+telnet: Unable to connect to remote host
+
+jcluser@Host3> telnet port 443 1.1.1.1    
+Trying 1.1.1.1...
+telnet: connect to address 1.1.1.1: Connection refused
+telnet: Unable to connect to remote host
+.
+.
+.
+
+jcluser@Host3> telnet port 443 1.1.1.1    
+Trying 1.1.1.1...
+telnet: connect to address 1.1.1.1: Connection refused
+telnet: Unable to connect to remote host
+
+jcluser@vSRX1> show security flow session | refresh          
+---(refreshed at 2025-09-16 09:36:20 UTC)---
+Session ID: 223, Policy name: to_web_server/4, State: Stand-alone, Timeout: 2, Valid
+  In: 200.0.13.2/64384 --> 1.1.1.1/443;tcp, Conn Tag: 0x0, If: ge-0/0/2.0, Pkts: 1, Bytes: 64, 
+  Out: 10.100.11.2/443 --> 200.0.13.2/64384;tcp, Conn Tag: 0x0, If: ge-0/0/0.0, Pkts: 1, Bytes: 40, 
+
+Session ID: 224, Policy name: to_web_server/4, State: Stand-alone, Timeout: 2, Valid
+  In: 200.0.13.2/51844 --> 1.1.1.1/443;tcp, Conn Tag: 0x0, If: ge-0/0/2.0, Pkts: 1, Bytes: 64, 
+  Out: 10.100.11.2/443 --> 200.0.13.2/51844;tcp, Conn Tag: 0x0, If: ge-0/0/0.0, Pkts: 1, Bytes: 40, 
+Total sessions: 2
+---(*more 100%)---[abort]
+
+
+
+jcluser@vSRX1> edit 
+Entering configuration mode
+
+[edit]
+jcluser@vSRX1# set security nat destination pool DMZ_SERVER2_PL address 10.100.12.2/32        
+
+[edit]
+jcluser@vSRX1# set security nat destination rule-set DMZ_SERVER_RS from zone untrust          
+
+[edit]
+jcluser@vSRX1# set security nat destination rule-set DMZ_SERVER_RS rule DMZ_SERVER2_RL match destination-address 2.2.2.2/32                    
+
+[edit]
+jcluser@vSRX1# set security nat destination rule-set DMZ_SERVER_RS rule DMZ_SERVER2_RL then destination-nat pool DMZ_SERVER2_PL   
+
+[edit]
+jcluser@vSRX1# commit and-quit 
+commit complete
+Exiting configuration mode
+
+jcluser@vSRX1> clear security nat statistics destination rule all    
+
+
+
+
+jcluser@Host3> ping 2.2.2.2 
+PING 2.2.2.2 (2.2.2.2): 56 data bytes
+64 bytes from 2.2.2.2: icmp_seq=0 ttl=63 time=1.622 ms
+64 bytes from 2.2.2.2: icmp_seq=1 ttl=63 time=1.171 ms
+64 bytes from 2.2.2.2: icmp_seq=2 ttl=63 time=1.423 ms
+64 bytes from 2.2.2.2: icmp_seq=3 ttl=63 time=1.308 ms
+64 bytes from 2.2.2.2: icmp_seq=4 ttl=63 time=1.224 ms
+64 bytes from 2.2.2.2: icmp_seq=5 ttl=63 time=1.268 ms
+64 bytes from 2.2.2.2: icmp_seq=6 ttl=63 time=1.106 ms
+64 bytes from 2.2.2.2: icmp_seq=7 ttl=63 time=1.282 ms
+64 bytes from 2.2.2.2: icmp_seq=8 ttl=63 time=1.237 ms
+64 bytes from 2.2.2.2: icmp_seq=9 ttl=63 time=1.291 ms
+64 bytes from 2.2.2.2: icmp_seq=10 ttl=63 time=1.010 ms
+64 bytes from 2.2.2.2: icmp_seq=11 ttl=63 time=1.185 ms
+64 bytes from 2.2.2.2: icmp_seq=12 ttl=63 time=1.305 ms
+^C
+--- 2.2.2.2 ping statistics ---
+13 packets transmitted, 13 packets received, 0% packet loss
+round-trip min/avg/max/stddev = 1.010/1.264/1.622/0.143 ms
+
+
+
+jcluser@vSRX1> show security flow session | refresh          
+---(refreshed at 2025-09-16 09:44:13 UTC)---
+Session ID: 241, Policy name: to_web_server/4, State: Stand-alone, Timeout: 2, Valid
+  In: 200.0.13.2/47956 --> 2.2.2.2/3;icmp, Conn Tag: 0x0, If: ge-0/0/2.0, Pkts: 1, Bytes: 84, 
+  Out: 10.100.12.2/3 --> 200.0.13.2/47956;icmp, Conn Tag: 0x0, If: ge-0/0/1.0, Pkts: 1, Bytes: 84, 
+
+Session ID: 242, Policy name: to_web_server/4, State: Stand-alone, Timeout: 2, Valid
+  In: 200.0.13.2/47956 --> 2.2.2.2/4;icmp, Conn Tag: 0x0, If: ge-0/0/2.0, Pkts: 1, Bytes: 84, 
+  Out: 10.100.12.2/4 --> 200.0.13.2/47956;icmp, Conn Tag: 0x0, If: ge-0/0/1.0, Pkts: 1, Bytes: 84, 
+Session ID: 243, Policy name: to_web_server/4, State: Stand-alone, Timeout: 4, Valid
+  In: 200.0.13.2/47956 --> 2.2.2.2/5;icmp, Conn Tag: 0x0, If: ge-0/0/2.0, Pkts: 1, Bytes: 84, 
+  Out: 10.100.12.2/5 --> 200.0.13.2/47956;icmp, Conn Tag: 0x0, If: ge-0/0/1.0, Pkts: 1, Bytes: 84, 
+Total sessions: 3
+---(refreshed at 2025-09-16 09:44:18 UTC)---
+Session ID: 247, Policy name: to_web_server/4, State: Stand-alone, Timeout: 2, Valid
+  In: 200.0.13.2/47956 --> 2.2.2.2/9;icmp, Conn Tag: 0x0, If: ge-0/0/2.0, Pkts: 1, Bytes: 84, 
+  Out: 10.100.12.2/9 --> 200.0.13.2/47956;icmp, Conn Tag: 0x0, If: ge-0/0/1.0, Pkts: 1, Bytes: 84, 
+
+Session ID: 248, Policy name: to_web_server/4, State: Stand-alone, Timeout: 2, Valid
+  In: 200.0.13.2/47956 --> 2.2.2.2/10;icmp, Conn Tag: 0x0, If: ge-0/0/2.0, Pkts: 1, Bytes: 84, 
+  Out: 10.100.12.2/10 --> 200.0.13.2/47956;icmp, Conn Tag: 0x0, If: ge-0/0/1.0, Pkts: 1, Bytes: 84, 
+
+Session ID: 249, Policy name: to_web_server/4, State: Stand-alone, Timeout: 4, Valid
+  In: 200.0.13.2/47956 --> 2.2.2.2/11;icmp, Conn Tag: 0x0, If: ge-0/0/2.0, Pkts: 1, Bytes: 84, 
+  Out: 10.100.12.2/11 --> 200.0.13.2/47956;icmp, Conn Tag: 0x0, If: ge-0/0/1.0, Pkts: 1, Bytes: 84, 
+Total sessions: 3
+---(refreshed at 2025-09-16 09:44:23 UTC)---
+Total sessions: 0
+---(refreshed at 2025-09-16 09:44:28 UTC)---
+Total sessions: 0
+---(refreshed at 2025-09-16 09:44:33 UTC)---
+Total sessions: 0
+---(*more 100%)---[abort]
+
+
+jcluser@vSRX1> ...estination rule DMZ_SERVER2_RL               
+Destination NAT rule: DMZ_SERVER2_RL         Rule-set: DMZ_SERVER_RS
+  Rule-Id                    : 2
+  Rule position              : 2
+  From zone                  : untrust
+    Destination addresses    : 2.2.2.2         - 2.2.2.2
+  Action                     : DMZ_SERVER2_PL
+  Translation hits           : 13
+    Successful sessions      : 13
+  Number of sessions         : 0
+
+
+jcluser@Host3> ssh 2.2.2.2                
+The authenticity of host '2.2.2.2 (2.2.2.2)' can't be established.
+ECDSA key fingerprint is SHA256:Ndf+fnyVBCUHIr0yq5sxQQnO57LsZ4N+YozIRAHMqts.
+Are you sure you want to continue connecting (yes/no)? ^C
+
+jcluser@vSRX1> show security flow session | refresh          
+---(refreshed at 2025-09-16 09:46:08 UTC)---
+Total sessions: 0
+---(refreshed at 2025-09-16 09:46:13 UTC)---
+Total sessions: 0
+---(refreshed at 2025-09-16 09:46:18 UTC)---
+Session ID: 254, Policy name: to_web_server/4, State: Stand-alone, Timeout: 1800, Valid
+  In: 200.0.13.2/54397 --> 2.2.2.2/22;tcp, Conn Tag: 0x0, If: ge-0/0/2.0, Pkts: 7, Bytes: 1925, 
+  Out: 10.100.12.2/22 --> 200.0.13.2/54397;tcp, Conn Tag: 0x0, If: ge-0/0/1.0, Pkts: 5, Bytes: 1865, 
+Total sessions: 1
+---(refreshed at 2025-09-16 09:46:23 UTC)---
+Session ID: 254, Policy name: to_web_server/4, State: Stand-alone, Timeout: 1794, Valid
+  In: 200.0.13.2/54397 --> 2.2.2.2/22;tcp, Conn Tag: 0x0, If: ge-0/0/2.0, Pkts: 7, Bytes: 1925, 
+  Out: 10.100.12.2/22 --> 200.0.13.2/54397;tcp, Conn Tag: 0x0, If: ge-0/0/1.0, Pkts: 5, Bytes: 1865, 
+Total sessions: 1
+---(*more 100%)---[abort]
+
+jcluser@vSRX1> show security nat destination rule DMZ_SERVER2_RL    
+Destination NAT rule: DMZ_SERVER2_RL         Rule-set: DMZ_SERVER_RS
+  Rule-Id                    : 2
+  Rule position              : 2
+  From zone                  : untrust
+    Destination addresses    : 2.2.2.2         - 2.2.2.2
+  Action                     : DMZ_SERVER2_PL
+  Translation hits           : 14
+    Successful sessions      : 14
+  Number of sessions         : 0
+  
+  
+jcluser@Host3> telnet port 443 2.2.2.2    
+Trying 2.2.2.2...
+telnet: connect to address 2.2.2.2: Connection refused
+telnet: Unable to connect to remote host
+.
+.
+.
+.
+jcluser@Host3> telnet port 443 2.2.2.2    
+Trying 2.2.2.2...
+telnet: connect to address 2.2.2.2: Connection refused
+telnet: Unable to connect to remote host
+  
+  
+
+jcluser@vSRX1> show security nat destination rule DMZ_SERVER2_RL    
+Destination NAT rule: DMZ_SERVER2_RL         Rule-set: DMZ_SERVER_RS
+  Rule-Id                    : 2
+  Rule position              : 2
+  From zone                  : untrust
+    Destination addresses    : 2.2.2.2         - 2.2.2.2
+  Action                     : DMZ_SERVER2_PL
+  Translation hits           : 21
+    Successful sessions      : 21
+  Number of sessions         : 0
+  
+  
+jcluser@vSRX1> show configuration security nat  
+destination {
+    pool DMZ_SERVER1_PL {
+        address 10.100.11.2/32;
+    }
+    pool DMZ_SERVER2_PL {
+        address 10.100.12.2/32;
+    }
+    rule-set DMZ_SERVER_RS {
+        from zone untrust;
+        rule DMZ_SERVER1_RL {
+            match {
+                destination-address 1.1.1.1/32;
+            }
+            then {
+                destination-nat {
+                    pool {
+                        DMZ_SERVER1_PL;
+                    }
+                }
+            }
+        }
+        rule DMZ_SERVER2_RL {
+            match {
+                destination-address 2.2.2.2/32;
+            }
+            then {
+                destination-nat {
+                    pool {
+                        DMZ_SERVER2_PL; 
+                    }                   
+                }                       
+            }                           
+        }                               
+    }                                   
+}                                       
+         
